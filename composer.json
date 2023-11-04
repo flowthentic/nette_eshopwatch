@@ -33,17 +33,12 @@
     "nettrine/orm": "~0.8.0",
     "nettrine/migrations": "~0.8.0",
     "nettrine/fixtures": "~0.6.0",
-    "nettrine/extensions-atlantic18": "~0.6.0"
+    "nette/forms": "^3.1"
   },
   "require-dev": {
     "contributte/dev": "^0.4",
     "ninjify/qa": "^0.13",
-    "ninjify/nunjuck": "^0.4",
-    "phpstan/phpstan": "^1.0",
-    "phpstan/extension-installer": "^1.0",
-    "phpstan/phpstan-nette": "^1.0",
-    "phpstan/phpstan-doctrine": "^1.0",
-    "phpstan/phpstan-strict-rules": "^1.0"
+    "ninjify/nunjuck": "^0.4"
   },
   "autoload": {
     "psr-4": {
