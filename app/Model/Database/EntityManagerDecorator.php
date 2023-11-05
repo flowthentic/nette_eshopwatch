@@ -9,7 +9,4 @@ use Nettrine\ORM\EntityManagerDecorator as NettrineEntityManagerDecorator;
  */
 final class EntityManagerDecorator extends NettrineEntityManagerDecorator
 {
-
-	use TRepositories;
-
 }
