@@ -1,6 +1,7 @@
 <?php
 namespace App\Model\Database;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -17,9 +18,24 @@ final class Product
     #[ORM\Column(length: 32, unique: true, nullable: false)]
     protected string $ean;
     #[ORM\Column(length: 32, unique: true, nullable: false)]
-    protected string $name;
+    public string $name;
 
-    #[ORM\OneToMany(targetEntity: Offer::class, mappedBy: 'for')]
-    protected Collection $offers;
+    #[ORM\OneToMany('for', Offer::class)]
+    public Collection $offers;
 
+    public function getOffers() : Collection
+    {
+        $newestFirst = Criteria::create()->orderBy(array('timestamp' => Criteria::DESC, ''));
+        return $this->offers->matching($newestFirst);
+    }
+    public function getCurrentOffers() : Collection
+    {
+        return $this->offers->matching(Offer::filterLastFetch());
+    }
+    public function getBestOffer() : Offer
+    {
+        $lowestFirst = Criteria::create()
+            ->orderBy(array('price' => Criteria::ASC));
+        return $this->getCurrentOffers()->matching($lowestFirst)[0];
+    }
 }
