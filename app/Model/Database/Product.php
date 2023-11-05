@@ -7,13 +7,19 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'products')]
 final class Product
 {
+    public function __construct(array $props)
+    {
+        $this->ean = $props['ean'];
+        $this->name = $props['name'];
+    }
+
     #[ORM\Id]
     #[ORM\Column(length: 32, unique: true, nullable: false)]
     protected string $ean;
     #[ORM\Column(length: 32, unique: true, nullable: false)]
     protected string $name;
 
-    #[ORM\OneToMany(targetEntity: Offer::class, mappedBy: 'product')]
-    private Collection $offers;
+    #[ORM\OneToMany(targetEntity: Offer::class, mappedBy: 'for')]
+    protected Collection $offers;
 
 }

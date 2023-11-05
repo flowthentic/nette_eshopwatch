@@ -7,9 +7,16 @@ session:
 
 services:
 	router: App\Router\RouterFactory::createRouter
+	fetch:
+		create: App\Console\Fetch
+		tags: 
+			console.command: 'app:fetch'
+
 
 extensions:
 	console: Contributte\Console\DI\ConsoleExtension(%consoleMode%)
+	console.extra: Contributte\Console\Extra\DI\ConsoleBridgesExtension(%consoleMode%)
+
 	nettrine.cache: Nettrine\Cache\DI\CacheExtension
 	nettrine.dbal: Nettrine\DBAL\DI\DbalExtension
 	nettrine.dbal.console: Nettrine\DBAL\DI\DbalConsoleExtension

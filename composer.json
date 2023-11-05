@@ -33,7 +33,8 @@
     "nettrine/orm": "~0.8.0",
     "nettrine/migrations": "~0.8.0",
     "nettrine/fixtures": "~0.6.0",
-    "nette/forms": "^3.1"
+    "nette/forms": "^3.1",
+    "contributte/console-extra": "^0.7.2"
   },
   "require-dev": {
     "contributte/dev": "^0.4",
