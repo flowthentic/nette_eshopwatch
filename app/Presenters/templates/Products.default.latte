@@ -2,13 +2,32 @@
 <html>
 <head>
 	<title>{$title}</title>
+	<style>
+	table {
+	margin: 1em;
+	}
+	tr:first-child {
+	font-weight: bolder;
+	}
+	nav {
+	text-align: center;
+	}
+	</style>
 </head>
 <body>
+	{ifset $rows}
+		<table>
+		{foreach $rows as $row}
+			<tr><td>{$row|implode:'</td><td>'|noescape }</td></tr>
+		{/foreach}
+		</table>
+	{else}
+		<em>No products to show yet. Try coming back after running fetch cmmand.</em>
+	{/ifset}
 
-<table>
-{foreach $rows as $row}
-	<tr><td>{$row|implode:'</td><td>'|noescape }</td></tr>
-{/foreach}
-</table>
+	<nav n:ifset="$paginator">
+		{include 'paginator.latte'}
+	</nav>
+
 </body>
 </html>

@@ -84,7 +84,6 @@ final class Notify extends Command
                 ->setHtmlBody($latte);
 
             $this->mailer->send($mail);
-            $output->writeln($latte);
             return 0;
         }
         finally
