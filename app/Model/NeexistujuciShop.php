@@ -3,11 +3,6 @@ namespace App\Model;
 
 class NeexistujuciShop extends AbstractShop
 {
-    public readonly int $shop_id;
-    public function __construct()
-    {
-        $this->shop_id = 2;
-    }
     public function query()
     {
         $json = json_decode($this->json);

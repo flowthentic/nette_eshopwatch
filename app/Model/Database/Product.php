@@ -32,10 +32,11 @@ final class Product
     {
         return $this->offers->matching(Offer::filterLastFetch());
     }
-    public function getBestOffer() : Offer
+    public function getBestOffer(Collection $offers = null) : Offer
     {
+        $offers ??= $this->getCurrentOffers();
         $lowestFirst = Criteria::create()
             ->orderBy(array('price' => Criteria::ASC));
-        return $this->getCurrentOffers()->matching($lowestFirst)[0];
+        return $offers->matching($lowestFirst)[0];
     }
 }

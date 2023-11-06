@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>eShopWatch Configuration</title>
+	<title>{$title}</title>
 </head>
 <body>
 
-<table n:if="$table">
-{foreach $table as $row}
-    {var $bestOffer = $row->getBestOffer()}
-	<tr><td>{$row->name}</td><td>{$bestOffer->price}</td><td>{$bestOffer->shop_id}</td></tr>
+<table>
+{foreach $rows as $row}
+	<tr><td>{$row|implode:'</td><td>'|noescape }</td></tr>
 {/foreach}
 </table>
 </body>

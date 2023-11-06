@@ -3,11 +3,6 @@ namespace App\Model;
 
 class FiktivnyShop extends AbstractShop
 {
-    public readonly int $shop_id;
-    public function __construct()
-    {
-        $this->shop_id = 1;
-    }
     public function query()
     {
         $feed = new \SimpleXMLElement($this->feed);

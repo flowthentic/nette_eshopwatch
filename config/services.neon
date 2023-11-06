@@ -6,11 +6,15 @@ session:
 	expiration: 14 days
 
 services:
-	router: App\Router\RouterFactory::createRouter
-	fetch:
+	- App\Router\RouterFactory::createRouter
+	-
 		create: App\Console\Fetch
 		tags: 
 			console.command: 'app:fetch'
+	-
+		create: App\Console\Notify
+		tags: 
+			console.command: 'app:notify'
 
 
 extensions:

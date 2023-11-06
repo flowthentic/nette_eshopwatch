@@ -18,6 +18,15 @@ final class ProductsPresenter extends UI\Presenter
 
     public function renderDefault()
     {
-        $this->template->table = $this->entityManager->getRepository(Product::class)->findAll();
+        $rows = array();
+        $rows[] = array('Product', 'Price', 'Eshop');
+        
+        foreach ($this->entityManager->getRepository(Product::class)->findAll() as $prod)
+        {
+            $best = $prod->getBestOffer();
+            $rows[] = array($prod->name, $best->price, $best->shop_id);
+        }
+        $this->template->title = 'Product prices';
+        $this->template->rows = $rows;
     }
 }
