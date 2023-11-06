@@ -9,7 +9,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 final class Notify extends Command
 {
-    private Config $address, $lastNotify, $threshold;
+    private Config|null $address, $lastNotify, $threshold;
 	public function __construct(
         private Database\EntityManagerDecorator $em,
         private Mail\Mailer $mailer)
@@ -17,8 +17,6 @@ final class Notify extends Command
         Database\Offer::$em = $em;
         $this->address = $em->find(Config::class, 'email');
         $this->threshold = $em->find(Config::class, 'threshold');
-        $this->lastNotify = $em->find(Config::class, 'lastNotify') ?? new Config('lastNotify');
-        $em->persist($this->lastNotify);
 		parent::__construct();
 	}
 
@@ -33,39 +31,43 @@ final class Notify extends Command
         if (is_null($this->address))
         {
             $output->writeln("First you have to configure your email address");
-            return Command::FAILURE;
+            exit();
         }
         if (is_null($this->threshold))
         {
             $output->writeln("First you have to configure minimum price difference");
-            return Command::FAILURE;
+            exit();
         }
-        return Command::SUCCESS;
+        return 0;
     }
 
 	protected function execute(InputInterface $input, OutputInterface $output): int
 	{
         $products = $this->em->getRepository(Database\Product::class)->findAll();
         $rows = array();
-        foreach ($products as $key => $prod)
-        {
-            $currentBest = $prod->getBestOffer();
-            if ($key == array_key_first($products) && $currentBest->timestamp <= $this->lastNotify->value)
-            {
-                $output->writeln("Notification has already been sent after last fetch at ".$this->lastNotify->value);
-                return 0;
-            }
-            $lastBest = $prod->getBestOffer($currentBest->getOlderOffers());
-            if (abs($lastBest->price - $currentBest->price) < $this->threshold->value) continue;
-            $rows[] = array(
-                $prod->name, 
-                sprintf('% .2f eur', $currentBest->price),
-                $currentBest->shop_id,
-                sprintf('% .2f eur', $lastBest->price)
-            );
-        }
         try
         {
+            foreach ($products as $key => $prod)
+            {
+                $currentBest = $prod->getBestOffer();
+                if (is_null($prod->last_signifficant))
+                {
+                    // if it is new product
+                    $prod->last_signifficant = $currentBest->price;
+                    $output->writeln("$prod->name now for $prod->last_signifficant");
+                    continue;
+                }
+                //$lastBest = $prod->getBestOffer($currentBest->getOlderOffers());
+                if (abs($prod->last_signifficant - $currentBest->price) < $this->threshold->value) continue;
+                $rows[] = array(
+                    $prod->name, 
+                    sprintf('% .2f eur', $currentBest->price),
+                    $currentBest->shop_id,
+                    sprintf('% .2f eur', $prod->last_signifficant)
+                );
+                vprintf('Product %s changed price from %4$.2f to %2$.2f', end($rows));
+                $prod->last_signifficant = $currentBest->price;
+            }
             if (empty($rows))
             {
                 $output->writeln("No signifficant changes happened");
@@ -87,7 +89,6 @@ final class Notify extends Command
         }
         finally
         {
-            $this->lastNotify = $currentBest->timestamp;
             $this->em->flush();
         }
 	}

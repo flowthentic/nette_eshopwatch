@@ -17,11 +17,15 @@ final class Product
     #[ORM\Id]
     #[ORM\Column(length: 32, unique: true, nullable: false)]
     protected string $ean;
+
     #[ORM\Column(length: 32, unique: true, nullable: false)]
     public string $name;
 
     #[ORM\OneToMany('for', Offer::class)]
     public Collection $offers;
+
+    #[ORM\Column(nullable: true)]
+    public float|null $last_signifficant;
 
     public function getOffers() : Collection
     {
@@ -36,7 +40,9 @@ final class Product
     {
         $offers ??= $this->getCurrentOffers();
         $lowestFirst = Criteria::create()
-            ->orderBy(array('price' => Criteria::ASC));
-        return $offers->matching($lowestFirst)[0];
+            ->orderBy(array('price' => Criteria::ASC))
+            ->setMaxResults(1);
+        $offers = $offers->matching($lowestFirst);
+        return $offers[0];
     }
 }

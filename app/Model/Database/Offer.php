@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: 'offers')]
 final class Offer
 {
-    public function __construct(string $shop_id, \DateTime $timestamp = new \DateTime)
+    public function __construct(string $shop_id, \DateTime $timestamp)
     {
         $this->shop_id = $shop_id;
         $this->timestamp = $timestamp;
