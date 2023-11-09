@@ -8,26 +8,22 @@ use Nette\Application\UI;
 
 final class ConfigPresenter extends UI\Presenter
 {
-    private EntityManagerDecorator $entityManager;
+    private EntityManagerDecorator $em;
     private Config $email, $threshold;
-    public function injectEntityManager(EntityManagerDecorator $em)
-    {
-        $this->entityManager = $em;
-        $this->email = $em->find(Config::class, 'email') ?? new Config('email');
-        $em->persist($this->email);
-        $this->threshold = $em->find(Config::class, 'threshold') ?? new Config('threshold');
-        $em->persist($this->threshold);
+    public function injectEntityManager(EntityManagerDecorator $em) {
+        $repo = $em->getRepository(Config::class);
+        $this->email = $repo->getByKey('email');
+        $this->threshold = $repo->getByKey('threshold');
+        $this->em = $em;
     }
 
-    public function actionSave(UI\Form $form, $data)
-    {
+    public function actionSave(UI\Form $form, $data) {
         $this->email->value = $data->email;
         $this->threshold->value = (string)$data->threshold;
-        $this->entityManager->flush();
+        $this->em->flush();
     }
 
-    public function createComponentConfigForm()
-    {
+    public function createComponentConfigForm() {
         $form = new UI\Form;
         $form->addEmail('email', 'Email address for alerts')
             ->setDefaultValue($this->email->value)

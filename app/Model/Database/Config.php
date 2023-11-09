@@ -2,7 +2,7 @@
 namespace App\Model\Database;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+#[ORM\Entity(ConfigRepository::class)]
 final class Config
 {
     public function __construct(string $key)
