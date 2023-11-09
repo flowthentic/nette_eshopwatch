@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Model\Database;
+
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
 use Doctrine\ORM\Mapping as ORM;
@@ -27,16 +29,16 @@ final class Product
     #[ORM\Column(nullable: true)]
     public float|null $last_signifficant;
 
-    public function getOffers() : Collection
+    public function getOffers(): Collection
     {
         $newestFirst = Criteria::create()->orderBy(array('timestamp' => Criteria::DESC, ''));
         return $this->offers->matching($newestFirst);
     }
-    public function getCurrentOffers() : Collection
+    public function getCurrentOffers(): Collection
     {
         return $this->offers->matching(Offer::filterLastFetch());
     }
-    public function getBestOffer(Collection $offers = null) : Offer
+    public function getBestOffer(Collection $offers = null): Offer
     {
         $offers ??= $this->getCurrentOffers();
         $lowestFirst = Criteria::create()

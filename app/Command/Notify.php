@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Console;
+
 use App\Model\Database;
 use App\Model\Database\Config;
 use Nette\Mail;
@@ -9,58 +11,54 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 final class Notify extends Command
 {
-    private Config|null $address, $lastNotify, $threshold;
-	public function __construct(
+    private Config $address;
+    private Config $threshold;
+    public function __construct(
         private Database\EntityManagerDecorator $em,
-        private Mail\Mailer $mailer)
-	{
+        private Mail\Mailer $mailer
+    ) {
         Database\Offer::$em = $em;
-        $this->address = $em->find(Config::class, 'email');
-        $this->threshold = $em->find(Config::class, 'threshold');
-		parent::__construct();
-	}
+        parent::__construct();
+    }
 
-	protected function configure(): void
-	{
-		$this->setName('app:notify')
-			->setDescription('Sends email notification of price changes.');
-	}
+    protected function configure(): void
+    {
+        $this->setName('app:notify')
+            ->setDescription('Sends email notification of price changes.');
+    }
 
     protected function interact(InputInterface $input, OutputInterface $output): int
     {
-        if (is_null($this->address))
-        {
-            $output->writeln("First you have to configure your email address");
-            exit();
-        }
-        if (is_null($this->threshold))
-        {
-            $output->writeln("First you have to configure minimum price difference");
+        $config = $this->em->getRepository(Config::class);
+        try {
+            $this->address = $config->findBy(['key' => 'email']);
+            $this->threshold = $config->findBy(['key' => 'threshold']);
+        } catch (\TypeError $e) {
+            $output->writeln("First you have to visit the settings page");
             exit();
         }
         return 0;
     }
 
-	protected function execute(InputInterface $input, OutputInterface $output): int
-	{
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
         $products = $this->em->getRepository(Database\Product::class)->findAll();
         $rows = array();
-        try
-        {
-            foreach ($products as $key => $prod)
-            {
+        try {
+            foreach ($products as $key => $prod) {
                 $currentBest = $prod->getBestOffer();
-                if (is_null($prod->last_signifficant))
-                {
+                if (is_null($prod->last_signifficant)) {
                     // if it is new product
                     $prod->last_signifficant = $currentBest->price;
                     $output->writeln("$prod->name now for $prod->last_signifficant");
                     continue;
                 }
                 //$lastBest = $prod->getBestOffer($currentBest->getOlderOffers());
-                if (abs($prod->last_signifficant - $currentBest->price) < $this->threshold->value) continue;
+                if (abs($prod->last_signifficant - $currentBest->price) < $this->threshold->value) {
+                    continue;
+                }
                 $rows[] = array(
-                    $prod->name, 
+                    $prod->name,
                     sprintf('% .2f eur', $currentBest->price),
                     $currentBest->shop_id,
                     sprintf('% .2f eur', $prod->last_signifficant)
@@ -68,28 +66,24 @@ final class Notify extends Command
                 vprintf('Product %s changed price from %4$.2f to %2$.2f', end($rows));
                 $prod->last_signifficant = $currentBest->price;
             }
-            if (empty($rows))
-            {
+            if (empty($rows)) {
                 $output->writeln("No signifficant changes happened");
                 return 0;
             }
-            $mail = new Mail\Message;
+            $mail = new Mail\Message();
             array_unshift($rows, array('Product', 'Price', 'Eshop', 'Old price')); //headings
-            $latte = new \Latte\Engine;
+            $latte = new \Latte\Engine();
             $latte = $latte->renderToString('app/Presenters/templates/Products.default.latte', array(
-                'rows'=>$rows,
-                'title'=> 'Price changes on configured eshops'));
+                'rows' => $rows,
+                'title' => 'Price changes on configured eshops'));
             $mail->setFrom('Franta <franta@example.com>')
                 ->addTo($this->address->value)
                 ->setHtmlBody($latte);
 
             $this->mailer->send($mail);
             return 0;
-        }
-        finally
-        {
+        } finally {
             $this->em->flush();
         }
-	}
-
+    }
 }

@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Presenters;
 
@@ -10,26 +12,31 @@ use Nette\Utils\Paginator;
 
 final class ProductsPresenter extends UI\Presenter
 {
-    private EntityManagerDecorator $entityManager;
+    private EntityManagerDecorator $em;
     public function injectEntityManager(EntityManagerDecorator $em)
     {
-        $this->entityManager = $em;
+        $this->em = $em;
         Offer::$em = $em;
     }
 
     public function renderDefault(int $page)
     {
         $rows[] = array('Product', 'Price', 'Eshop');
-        $repo = $this->entityManager->getRepository(Product::class);
-        $pgr = new Paginator;
+        $repo = $this->em->getRepository(Product::class);
+        $pgr = new Paginator();
         $pgr->setItemCount($repo->count(array()));
         $pgr->setItemsPerPage(100);
         $pgr->setPage($page);
 
-        if ($pgr->getItemCount() > 0)
-        {
-            foreach ($repo->findBy(array(), null, $pgr->getItemsPerPage(), $pgr->getFirstItemOnPage()-1) as $prod)
-            {
+        if ($pgr->getItemCount() > 0) {
+            foreach (
+                $repo->findBy(
+                    array(),
+                    null,
+                    $pgr->getItemsPerPage(),
+                    $pgr->getFirstItemOnPage() - 1
+                ) as $prod
+            ) {
                 $best = $prod->getBestOffer();
                 $rows[] = array($prod->name, $best->price, $best->shop_id);
             }

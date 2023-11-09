@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Model;
 
 class NeexistujuciShop extends AbstractShop
@@ -6,8 +7,9 @@ class NeexistujuciShop extends AbstractShop
     public function query()
     {
         $json = json_decode($this->json);
-        foreach ($json->products as $product)
+        foreach ($json->products as $product) {
             yield (array)$product;
+        }
     }
 
     private string $json = <<< 'EOF'

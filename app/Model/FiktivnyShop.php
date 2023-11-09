@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Model;
 
 class FiktivnyShop extends AbstractShop
@@ -6,16 +7,15 @@ class FiktivnyShop extends AbstractShop
     public function query()
     {
         $feed = new \SimpleXMLElement($this->feed);
-        foreach ($feed->children() as $product)
-        {
+        foreach ($feed->children() as $product) {
             $data = array();
-            foreach ($product->children() as $prop)
+            foreach ($product->children() as $prop) {
                 $data[$prop->getName()] = $prop->__toString();
+            }
             yield $data;
         }
 
         return $data;
-
     }
 
     private string $feed = <<< 'EOF'

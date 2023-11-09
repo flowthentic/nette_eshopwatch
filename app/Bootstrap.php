@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace App;
 
@@ -7,30 +9,28 @@ use Nette\Configurator;
 
 class Bootstrap
 {
+    public static function boot(): Configurator
+    {
+        $configurator = new ExtraConfigurator();
 
-	public static function boot(): Configurator
-	{
-		$configurator = new ExtraConfigurator();
+        // According to NETTE_DEBUG env
+        $configurator->setEnvDebugMode();
 
-		// According to NETTE_DEBUG env
-		$configurator->setEnvDebugMode();
+        $configurator->enableTracy(__DIR__ . '/../var/log');
 
-		$configurator->enableTracy(__DIR__ . '/../var/log');
+        $configurator->setTimeZone('Europe/Prague');
+        $configurator->setTempDirectory(__DIR__ . '/../var/tmp');
 
-		$configurator->setTimeZone('Europe/Prague');
-		$configurator->setTempDirectory(__DIR__ . '/../var/tmp');
+        $configurator->createRobotLoader()
+            ->addDirectory(__DIR__)
+            ->register();
 
-		$configurator->createRobotLoader()
-			->addDirectory(__DIR__)
-			->register();
+        $configurator
+            ->addConfig(__DIR__ . '/../config/services.neon');
 
-		$configurator
-			->addConfig(__DIR__ . '/../config/services.neon');
+        $configurator
+            ->addConfig(__DIR__ . '/../config/local.neon');
 
-		$configurator
-			->addConfig(__DIR__ . '/../config/local.neon');
-
-		return $configurator;
-	}
-
+        return $configurator;
+    }
 }

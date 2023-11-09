@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Model\Database;
+
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(ConfigRepository::class)]
