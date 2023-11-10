@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Model\AbstractShop;
 use App\Model\Database;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -9,7 +10,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 final class Fetch extends Command
 {
-    public function __construct(private Database\EntityManagerDecorator $em)
+    public function __construct(
+        private Database\EntityManagerDecorator $em,
+        private array $shops)
     {
         parent::__construct();
     }
@@ -23,26 +26,16 @@ final class Fetch extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $now = new \DateTime();
-        $loader = new \Nette\Loaders\RobotLoader();
-        $loader->addDirectory(__DIR__ . '/../Model');
-        $loader->setTempDirectory(__DIR__ . '/../../temp/');
-        $parent = new \ReflectionClass(\App\Model\AbstractShop::class);
-        foreach (array_keys($loader->getIndexedClasses()) as $shop) {
-            $shop = new \ReflectionClass($shop);
-            if ($shop->isAbstract() || $shop->getParentClass() != $parent) {
-                continue;
-            }
-
-            foreach ($shop->newInstance()->query() as $itemData) {
+        foreach ($this->shops as $shop) {
+            foreach ($shop->query() as $itemData) {
                 $product = $this->em->find(Database\Product::class, $itemData['ean']);
                 if (is_null($product)) {
                     $product = new Database\Product($itemData);
-                    //$product
                     $output->writeln("Fetched new product $product->name");
                     $this->em->persist($product);
                 }
 
-                $newOffer = new Database\Offer($shop->getName(), $now);
+                $newOffer = new Database\Offer(get_class($shop), $now);
                 $newOffer->price = $itemData['price'];
                 $newOffer->for = $product;
                 $this->em->persist($newOffer);
