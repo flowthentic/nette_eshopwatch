@@ -17,34 +17,22 @@ final class Product
     }
 
     #[ORM\Id]
-    #[ORM\Column(length: 32, unique: true, nullable: false)]
+    #[ORM\Column(length: 32, unique: true)]
     protected string $ean;
 
-    #[ORM\Column(length: 32, unique: true, nullable: false)]
+    #[ORM\Column(length: 32, unique: true)]
     public string $name;
 
     #[ORM\OneToMany('for', Offer::class)]
     public Collection $offers;
 
     #[ORM\Column(nullable: true)]
-    public float|null $last_signifficant;
+    public ?float $last_signifficant;
 
-    public function getOffers(): Collection
+    public function getOffers(Criteria $criteria = null): Collection
     {
-        $newestFirst = Criteria::create()->orderBy(array('timestamp' => Criteria::DESC, ''));
-        return $this->offers->matching($newestFirst);
-    }
-    public function getCurrentOffers(): Collection
-    {
-        return $this->offers->matching(Offer::filterLastFetch());
-    }
-    public function getBestOffer(Collection $offers = null): Offer
-    {
-        $offers ??= $this->getCurrentOffers();
-        $lowestFirst = Criteria::create()
-            ->orderBy(array('price' => Criteria::ASC))
-            ->setMaxResults(1);
-        $offers = $offers->matching($lowestFirst);
-        return $offers[0];
+        return is_null($criteria)
+            ? $this->offers
+            : $this->offers->matching($criteria);
     }
 }

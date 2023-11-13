@@ -1,0 +1,15 @@
+{layout '../layout.latte'}
+{block content}
+	{ifset $rows}
+		<table>
+			<tr><td>{$thead|implode:'</td><td>'|noescape }</td></tr>
+		{foreach $rows as $row}
+			<tr><td>{$row|implode:'</td><td>'|noescape }</td></tr>
+		{/foreach}
+		</table>
+	{else}
+		<em>No {$title} to show. Try coming back after running the fetch cmmand.</em>
+	{/ifset}
+
+	{block paginator}{/block}
+{/block}

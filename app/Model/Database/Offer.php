@@ -7,7 +7,7 @@ use Doctrine\Common\Collections\Criteria;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+#[ORM\Entity(OfferRepository::class)]
 #[ORM\Table(name: 'offers')]
 final class Offer
 {
@@ -35,23 +35,6 @@ final class Offer
     #[ORM\JoinColumn(name: 'ean', referencedColumnName: 'ean')]
     public Product $for;
 
-    public static EntityManagerDecorator $em;
-    public static function filterLastFetch(\DateTime $lowerThan = null): Criteria
-    {
-        $qb = self::$em->createQueryBuilder();
-        $qb->select($qb->expr()->max('o.timestamp'))
-            ->from(Offer::class, 'o');
-        if (!is_null($lowerThan)) {
-            $qb->where($qb->expr()->lt('o.timestamp', ':dt'));
-            $qb->setParameter('dt', $lowerThan, Types::DATETIME_MUTABLE);
-        }
-
-        $lastFetch = $qb->getQuery()->getSingleResult()[1];
-        $lastFetch = is_null($lastFetch) ? 'null' : new \DateTime($lastFetch);
-        return Criteria::create()
-            ->where(Criteria::expr()->eq('timestamp', $lastFetch));
-    }
-
     public function getPeerOffers(Criteria $criteria = null): Collection
     {
         $criteria ??= Criteria::create();
@@ -59,11 +42,5 @@ final class Offer
             ->where(Criteria::expr()->eq('timestamp', $this->timestamp))
             ->orderBy(array('price' => Criteria::ASC));
         return $this->for->offers->matching($criteria);
-    }
-
-    public function getOlderOffers(): Collection
-    {
-        $criteria = self::filterLastFetch($this->timestamp);
-        return $this->getPeerOffers($criteria);
     }
 }
